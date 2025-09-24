@@ -18,5 +18,12 @@ cd Zeta-Coherence-Unification/code
 pip install numpy matplotlib pandas
 python zeta_confinement_patched.py
 
+# Linux/Mac:
+chmod +x run_demo.sh
+./run_demo.sh
+
+# Windows:
+run_demo.bat
+
 See immediate graphical results
 More content coming soon... (papers, code, certificates)
