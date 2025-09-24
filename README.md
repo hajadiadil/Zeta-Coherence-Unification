@@ -26,4 +26,9 @@ chmod +x run_demo.sh
 run_demo.bat
 
 See immediate graphical results
+
+## 📊 IMMEDIATE VISUAL PROOF
+![Zeta Confinement Profile](data/zeta_conf_profile.png)
+*Zeros clearly confined on critical line σ=1/2*
+
 More content coming soon... (papers, code, certificates)
