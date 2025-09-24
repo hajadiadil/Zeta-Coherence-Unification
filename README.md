@@ -18,3 +18,4 @@ cd Zeta-Coherence-Unification
 python code/zeta_confinement_patched.py
 
 See immediate graphical results
+More content coming soon... (papers, code, certificates)
