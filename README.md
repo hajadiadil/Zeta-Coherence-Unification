@@ -12,7 +12,6 @@
 ---
 
 ## 🚀 INSTANT TEST (30 seconds)
-## 🚀 INSTANT TEST (30 seconds)
 ```bash
 git clone https://github.com/[hajadiadil]/Zeta-Coherence-Unification
 cd Zeta-Coherence-Unification/code
