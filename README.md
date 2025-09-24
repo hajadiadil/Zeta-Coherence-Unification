@@ -16,3 +16,5 @@
 git clone https://github.com/[TON-USERNAME]/Zeta-Coherence-Unification
 cd Zeta-Coherence-Unification
 python code/zeta_confinement_patched.py
+
+See immediate graphical results
