@@ -13,7 +13,7 @@
 
 ## 🚀 INSTANT TEST (30 seconds)
 ```bash
-git clone https://github.com/[hajadiadil]/Zeta-Coherence-Unification
+git clone https://github.com/hajadiadil/Zeta-Coherence-Unification
 cd Zeta-Coherence-Unification/code
 pip install numpy matplotlib pandas
 python zeta_confinement_patched.py
