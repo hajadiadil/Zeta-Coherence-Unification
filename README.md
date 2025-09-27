@@ -24,3 +24,33 @@ Le papier **"Vers la Zêta-Cohérence : Fondements et Visualisations"** propose 
 git clone https://github.com/tonpseudo/Zeta-Coherence-Unification.git
 cd Zeta-Coherence-Unification
 
+pip install -r requirements.txt
+
+python zetaduconfinement.py
+
+| Fichier Python                      | Description                                                                                       |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `ArtinZeta.py`                      | Construction de la zêta d’Artin (pondération par caractères de Dirichlet et structure modulaire). |
+| `StressTest.py`                     | Tests de robustesse et de sensibilité du modèle numérique.                                        |
+| `StressTestArtin.py`                | Variante du stress test appliqué à la zêta d’Artin.                                               |
+| `turing_dirichlet_zeros.py`         | Localisation des zéros via la méthode de Turing pour fonctions L et variantes.                    |
+| `06_weil_kernel_gaussian_arb_v5.py` | Noyau de Weil avec lissage gaussien arbitraire, utilisé pour la cohérence spectrale.              |
+| `zetaduconfinement.py`              | Script principal pour générer les visualisations du papier.                                       |
+
+🖼️ Figures et Visualisations
+
+Les figures générées incluent :
+
+FFT et cohérence fréquentielle
+Corrélations croisées pondérées
+Alignement spectral avec les spectres hadroniques (type Welch)...
+
+📘 Licence
+
+Ce projet est distribué sous la licence MIT. Vous êtes libre de l’utiliser, modifier et redistribuer avec attribution.
+
+🙏 Remerciements
+
+Merci aux travaux classiques de Riemann, Odlyzko, et aux inspirations venues de la physique mathématique contemporaine (Dyson, Weil, etc.).
+
+Pour toute remarque, discussion ou collaboration, n’hésitez pas à me contacter via GitHub ou en commentaire de l’article.
