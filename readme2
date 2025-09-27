@@ -1,1 +1,281 @@
+# Zeta Coherence Unification
+
+> Détection d’anomalies faibles sur séries temporelles irrégulières via noyau de zêta‑cohérence, permutations circulaires et contrôle du FDR, avec validations certifiées.
+
+![banner](docs/_static/banner.png)
+
+---
+
+## Sommaire
+
+* [Vision](#vision)
+* [Caractéristiques](#caractéristiques)
+* [Installation](#installation)
+
+  * [Option A — pip](#option-a--pip)
+  * [Option B — Hatch](#option-b--hatch)
+  * [Option C — Docker](#option-c--docker)
+* [Démarrage rapide](#démarrage-rapide)
+* [Jeu d’essai minimal](#jeu-dessai-minimal)
+* [CLI & commandes](#cli--commandes)
+* [Configuration](#configuration)
+* [Certificats de calcul](#certificats-de-calcul)
+* [Reproduction des figures](#reproduction-des-figures)
+* [Validation indépendante](#validation-indépendante)
+* [Performance & reprises](#performance--reprises)
+* [Bonnes pratiques](#bonnes-pratiques)
+* [Feuille de route](#feuille-de-route)
+* [Citer ce travail](#citer-ce-travail)
+* [Licence](#licence)
+
+---
+
+## Vision
+
+Nous unifions des briques arithmétiques (noyau de zêta‑cohérence, ordres multiplicatifs) avec un pipeline statistique moderne (permutations circulaires, contrôle du **FDR**) pour détecter des anomalies faibles dans des séries **irrégulières** (ex. courbes de lumière). Le projet met l’accent sur la **vérifiabilité** : chaque résultat lourd produit un **certificat** rejouable et une procédure de **revalidation** indépendante.
+
+## Caractéristiques
+
+* **Détection faible** robustifiée par permutations circulaires + contrôle du *False Discovery Rate*.
+* **Artefacts vérifiables** : certificats JSON + script de revalidation.
+* **Reproductibilité** : environnements gelés, Docker, CI, commande unique pour reproduire les figures clés.
+* **Ergonomie** : CLI dédiées, logs structurés, schéma de configuration centralisé.
+
+---
+
+## Installation
+
+> Requiert Python ≥ 3.9, < 3.13. OS : Linux/macOS/Windows.
+
+### Option A — pip
+
+```bash
+# Dans un venv/conda activé
+pip install -U pip
+pip install -e .[dev]
+```
+
+### Option B — Hatch
+
+```bash
+pip install hatch
+hatch env create
+hatch run test   # tests rapides
+```
+
+### Option C — Docker
+
+```bash
+# Construire l’image
+docker build -t zeta-cu:latest .
+# Lancer un run éphémère (monte ./outputs sur le host)
+docker run --rm -it -v $(pwd)/outputs:/app/outputs zeta-cu:latest \
+  zeta-fdr --help
+```
+
+> **Astuce** : sous Windows PowerShell, remplacez `$(pwd)` par `${PWD}`.
+
+---
+
+## Démarrage rapide
+
+### 1) Aide des commandes
+
+```bash
+zeta-fdr --help
+vega-day-nwin --help
+fdr-intersect --help
+```
+
+### 2) Demo instantanée (petits paramètres)
+
+```bash
+# Lance une analyse courte et produit un certificat + une figure de contrôle
+zeta-fdr --pmax 5000 --sigma 0.15 0.30 0.45 \
+  --u-scale 1.0 --alpha 0.05 \
+  --outputs outputs/demo_small
+```
+
+Résultats attendus :
+
+* `outputs/demo_small/certificates/*.json`
+* `outputs/demo_small/figures/*.png`
+* `outputs/demo_small/logs/run.log`
+
+---
+
+## Jeu d’essai minimal
+
+Un mini dataset synthétique est fourni dans `data/sample/`. Il couvre un cas régulier, un cas irrégulier et un cas bruité. Pour tester :
+
+```bash
+zeta-fdr --input data/sample/vega_day.csv --pmax 5000 --outputs outputs/sample
+```
+
+---
+
+## CLI & commandes
+
+Trois points d’entrée sont exposés :
+
+### `zeta-fdr`
+
+Pipeline principal (zêta‑cohérence + permutations circulaires + FDR).
+
+**Arguments clés**
+
+* `--input PATH` : CSV (colonnes attendues : `time,value`), sinon jeu synthétique par défaut.
+* `--pmax INT` : borne supérieure des premiers/paramètres arithmétiques (par défaut : modéré).
+* `--sigma s1 s2 s3` : triplet de largeurs (ex. `0.15 0.30 0.45`).
+* `--u-scale FLOAT` : échelle d’énergie.
+* `--alpha FLOAT` : niveau FDR (ex. `0.05`).
+* `--outputs DIR` : dossier de sortie (obligatoire pour les runs sérieux).
+* `--seed INT` : graine RNG (traçabilité).
+* `--resume` : reprise si un run a été interrompu.
+* `--dry-run` : valide la config sans lancer le calcul lourd.
+
+### `vega-day-nwin`
+
+Exemple reproduisant l’expérience « Vega Day » avec fenêtre glissante sur `nwin` segments.
+
+**Arguments** : `--nwin`, `--step`, `--outputs`, `--plot`.
+
+### `fdr-intersect`
+
+Opération utilitaire : intersection/agrégation de segments significatifs sous contrôle FDR.
+
+---
+
+## Configuration
+
+Vous pouvez centraliser les paramètres dans un `config.yaml` :
+
+```yaml
+version: 1
+input: data/sample/vega_day.csv
+pmax: 5000
+sigma: [0.15, 0.30, 0.45]
+u_scale: 1.0
+alpha: 0.05
+seed: 12345
+outputs: outputs/vega_day
+logging:
+  level: INFO
+  file: logs/run.log
+```
+
+Utilisation :
+
+```bash
+zeta-fdr --config config.yaml
+```
+
+---
+
+## Certificats de calcul
+
+Chaque run sérieux émet un **certificat** JSON signé par empreinte git + hachage des paramètres.
+
+### Schéma (simplifié)
+
+```json
+{
+  "schema": "zcu/certificat@1",
+  "git": { "commit": "<hash>", "dirty": false },
+  "env": { "python": "3.12.5", "platform": "linux-x86_64" },
+  "params": {
+    "input": "data/sample/vega_day.csv",
+    "pmax": 5000,
+    "sigma": [0.15, 0.30, 0.45],
+    "u_scale": 1.0,
+    "alpha": 0.05,
+    "seed": 12345
+  },
+  "artifacts": {
+    "figures": ["figures/zeta_profile.png"],
+    "tables": ["tables/summary.csv"]
+  },
+  "metrics": {
+    "discoveries": 7,
+    "fdr_estimate": 0.041
+  },
+  "timings": { "started": "2025-09-20T12:34:56Z", "duration_s": 182.4 },
+  "status": "ok"
+}
+```
+
+---
+
+## Reproduction des figures
+
+Reproduisez la figure canonique (profil de zêta‑cohérence) :
+
+```bash
+hatch run demo
+# ou
+python -m zeta_fdr.zeta_flux_perm_fdr --plot --outputs outputs/fig_repro
+```
+
+Les images sont écrites sous `outputs/fig_repro/figures/`.
+
+---
+
+## Validation indépendante
+
+Pour relire un certificat (sans relancer tout le pipeline) :
+
+```bash
+python -m zeta_fdr.verify_cert --input outputs/demo_small/certificates/run.json
+```
+
+Sortie : verdict (`ok/failed`), éventuels écarts de bornes, et traces minimalistes.
+
+---
+
+## Performance & reprises
+
+* **Progression** : barres `tqdm` pour les boucles lourdes.
+* **Cache** : pré‑calcul et mise en cache d’objets arithmétiques (nombres premiers, ordres) en `.npz`.
+* **Reprise** : `--resume` redémarre à partir du dernier bloc validé (fichier d’état verrouillé).
+
+> **Conseil** : commencez avec `--pmax 5000` pour du *smoke test*, puis augmentez.
+
+---
+
+## Bonnes pratiques
+
+* Activer le logging : `--log-level INFO` (ou via `config.yaml`).
+* Fixer `--seed` pour la traçabilité expérimentale.
+* Ranger vos sorties par date : `outputs/2025-09-27/run_<hash>/...`.
+
+---
+
+## Feuille de route
+
+* [ ] Publication d’un paquet PyPI minimal.
+* [ ] Note **JOSS** (logiciel scientifique).
+* [ ] Préprint arXiv : bornes, preuves par arithmétique d’intervalles, expériences.
+* [ ] Connecteurs de données (FITS/astroquery).
+
+---
+
+## Citer ce travail
+
+> *Auteur*, **Zeta Coherence Unification** (année). DOI/URL. Version logicielle : `v0.x.y`.
+
+```
+@software{zcu_2025,
+  title = {Zeta Coherence Unification},
+  author = {Auteur},
+  year = {2025},
+  url = {https://github.com/<user>/Zeta-Coherence-Unification},
+  version = {v0.x.y}
+}
+```
+
+---
+
+## Licence
+
+Ce dépôt est publié sous **MIT**. Voir `LICENSE`.
 
